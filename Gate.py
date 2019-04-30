@@ -14,7 +14,7 @@ class Gate(object):
         """
         self.type = gate_type
         self.id = gate_id
-        self.prior = prior if prior is not None else random.random() * 0.5
+        self.prior = prior if prior is not None else random.random() * 0.5,
         self.output = output
         self.inputs = inputs
 
@@ -39,35 +39,35 @@ class Gate(object):
 
 class XOR_GATE(Gate):
     def activate(self, inputs):
-        return bool(inputs[0]) != bool(inputs[1]), self.prior
+        return bool(inputs[0]) != bool(inputs[1])
 
 
 class AND_GATE(Gate):
     def activate(self, inputs):
-        return bool(inputs[0]) and bool(inputs[1]), self.prior
+        return bool(inputs[0]) and bool(inputs[1])
 
 
 class OR_GATE(Gate):
     def activate(self, inputs):
-        return bool(inputs[0]) or bool(inputs[1]), self.prior
+        return bool(inputs[0]) or bool(inputs[1])
 
 
 class NOR_GATE(Gate):
     def activate(self, inputs):
-        return not(bool(inputs[0]) or bool(inputs[1])), self.prior
+        return not(bool(inputs[0]) or bool(inputs[1]))
 
 
 class NAND_GATE(Gate):
     def activate(self, inputs):
-        return not(bool(inputs[0]) and bool(inputs[1])), self.prior
+        return not(bool(inputs[0]) and bool(inputs[1]))
 
 
 class INVERT_GATE(Gate):
     def activate(self, inputs):
-        return not bool(inputs[0]), self.prior
+        return not bool(inputs[0])
 
 
 class BUFFER_GATE(Gate):
     def activate(self, inputs):
-        return bool(inputs[0]), self.prior
+        return bool(inputs[0])
 
