@@ -24,4 +24,4 @@ def read_observation(path):
     observations = [preprocess_obs(obs) for obs in observation_list]
     return observations
 
-read_observation(r'C:\Users\t-alkre\Documents\diagnosis\observations\c17_iscas85.obs')
+# read_observation(r'C:\Users\t-alkre\Documents\diagnosis\observations\c17_iscas85.obs')

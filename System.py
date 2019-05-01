@@ -1,5 +1,7 @@
 import copy
 from string import digits
+import networkx
+import pylab
 
 from Gate import Gate
 
@@ -55,3 +57,43 @@ class System(object):
             values_dict[current_gate.output] = int(output)
         return {o: values_dict[o] for o in self.outputs}
 
+    def draw(self):
+        # Build a graph
+        G = networkx.DiGraph()
+
+        component = set()
+
+        for g in self.gates:
+            G.add_node(g.id, s="s")
+
+            for c in g.inputs:
+                if c not in component:
+                    component.add(c)
+                    G.add_node(c, s="o")
+                G.add_edge(c, g.id)
+
+            if g.output not in component:
+                component.add(g.output)
+                G.add_node(g.output, s="o")
+            G.add_edge(g.id, g.output)
+
+        # Drawing the graph
+        # First obtain the node positions using one of the layouts
+        nodes_pos = networkx.layout.kamada_kawai_layout(G)
+
+        # Get all distinct node classes according to the node shape attribute
+        nodes_shapes = set((n_shape[1]["s"] for n_shape in G.nodes(data=True)))
+
+        # For each node class filter and draw the subset of nodes with the same symbol
+        for n_shape in nodes_shapes:
+            networkx.draw_networkx_nodes(G, nodes_pos, node_color='b', node_size=1500, node_shape=n_shape,
+                                         nodelist=[s_node[0] for s_node in filter(
+                                             lambda x: x[1]["s"] == n_shape, G.nodes(data=True))], with_labels=True)
+
+        # Finally, draw the edges between the nodes
+        networkx.draw_networkx_edges(G, nodes_pos, arrowsize=50)
+        networkx.draw_networkx_labels(G, nodes_pos, font_color='w', font_size=10)
+
+        # And show the final result
+        pylab.axis('off')
+        pylab.show()
