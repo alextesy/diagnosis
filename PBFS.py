@@ -2,9 +2,10 @@ import random
 
 
 def is_superset(gate_set, diagnoses):
-    for diagnoses in diagnoses:
-        if diagnoses.issubset(gate_set):
+    for diagnose in diagnoses:
+        if diagnose[0].issubset(gate_set):
             return True
+    return False
 
 
 def add_neighbors(queue, gate_set, gates):
@@ -22,11 +23,7 @@ def add_neighbors(queue, gate_set, gates):
     return candidates + queue
 
 
-def get_full_diagnose(system, observation):
-    gate_prior = random.random() * 0.5
-
-    observation_prior = random.random() * 0.75
-
+def get_diagnose(system, observation, gate_prior, observation_prior, full):
     observation_inputs = observation[0]
     observation_outputs = observation[1]
 
@@ -36,8 +33,9 @@ def get_full_diagnose(system, observation):
 
     while len(queue) > 0:
         gate_set = queue.pop()
-        # if is_superset(gate_set, diagnoses):
-        #     continue
+
+        if (not full) and is_superset(gate_set, diagnoses):
+            continue
 
         outputs = system.run(input_values=observation_inputs, invalid_gates=gate_set)
 
@@ -48,7 +46,8 @@ def get_full_diagnose(system, observation):
             else:
                 dp *= (1 - observation_prior)
 
-        diagnoses.append((gate_set, dp))
+        if dp > 0:
+            diagnoses.append((gate_set, dp))
 
         queue = add_neighbors(queue, gate_set, gates)
 
