@@ -7,25 +7,16 @@ import operator
 
 gate_prior = random.random() * 0.5
 
-observation_prior = 1.0 - random.random() * 0.25
-
 system_gal = System.create_system(r'data_systems\c17.sys')
 observations = read_observation(r'C:\Users\t-alkre\Documents\diagnosis\observations\c17_iscas85.obs')
-predicted_diagnoses = get_diagnose(system_gal, observations[0], gate_prior, observation_prior, True)
+predicted_diagnoses = get_diagnose(system_gal, observations, gate_prior)
 
-observation = observations[0]
+for observation in observations:
+    for o, v in observation[1].items():
+        if random.random() > (1.0 - random.random() * 0.25):
+            observation[1][o] = 1 - v
 
-observation_inputs = observation[0]
-observation_outputs = observation[1]
-
-observation_output_values = {}
-for o, v in observation_outputs.items():
-    if random.random() <= observation_prior:
-        observation_output_values[o] = v
-    else:
-        observation_output_values[o] = 1 - v
-
-true_diagnoses = get_diagnose(system_gal, observations[0], gate_prior, 1, False)
+true_diagnoses = get_diagnose(system_gal, observations, gate_prior, 0)
 
 print(sorted(predicted_diagnoses, key=operator.itemgetter(1))[::-1])
 print('\n\n\n')
