@@ -24,24 +24,29 @@ def add_neighbors(queue, gate_set, gates):
     return candidates + queue
 
 
-def get_diagnose(system, observations, gate_prior, observation_p=0.25):
+def get_diagnose(system, observation, observation_priors, gate_prior):
     diagnoses = []
-    for observation in observations:
-        observation_priors = {o: 1.0 - random.random() * observation_p for o in observation[1].keys()}
-        observation_diagnoses = get_observation_diagnoses(system, observation, gate_prior)
 
-        if len(diagnoses) == 0:
-            new_diagnoses = observation_diagnoses
-        else:
-            new_diagnoses = defaultdict(int)
-            for o_d, o_p in observation_diagnoses:
-                for d, p in diagnoses:
-                    union = tuple(sorted(o_d.union(d)))
-                    new_diagnoses[union] += o_p * p
-            new_diagnoses = new_diagnoses.items()
+    output_ids = list(observation[1].keys())
+    for i in range(2 ** len(output_ids)):
+        values_string = ('{0:0' + str(len(output_ids)) + 'b}').format(i)
 
-        new_diagnoses_list = sorted(new_diagnoses, key=lambda item: len(item[0]))
-        diagnoses = [(t[0], t[1]) for i, t in enumerate(new_diagnoses_list) if not is_superset(t[0], new_diagnoses_list[:i])]
+        obs = (observation[0], {})
+
+        for v_i, v in enumerate(values_string):
+            obs[1][output_ids[v_i]] = int(v)
+
+        obs_p = 1.0
+        for o in output_ids:
+            if obs[1][o] == observation[1][o]:
+                obs_p *= observation_priors[o]
+            else:
+                obs_p *= 1 - observation_priors[o]
+
+        observation_diagnoses = get_observation_diagnoses(system, obs, gate_prior)
+        observation_diagnoses = [(t[0], t[1] * obs_p) for t in observation_diagnoses]
+
+        diagnoses.extend(observation_diagnoses)
 
     return diagnoses
 
