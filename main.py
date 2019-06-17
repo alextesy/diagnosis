@@ -3,18 +3,23 @@ from observation_parse import read_observation
 from PBFS import get_diagnose, get_observation_diagnoses
 import random
 import operator
+import time
 
 
 gate_prior = random.random() * 0.5
 
-system_gal = System.create_system(r'data_systems\c17.sys')
-
-observations = read_observation(r'observations\c17_iscas85.obs')
+system_gal = System.create_system(r'data_systems\c432.sys')
+#system_gal.draw()
+observations = read_observation(r'observations\c432_iscas85.obs')
 
 observation = observations[0]
 observation_priors = {o: 1.0 - random.random() * 0.25 for o in observation[1].keys()}
-
-predicted_diagnoses = get_diagnose(system_gal, observation, observation_priors, gate_prior)
+start_time = time.time()
+predicted_diagnoses1 = get_diagnose(system_gal, observation, observation_priors, gate_prior, experiment=False)
+print("--- Baseline %s seconds ---" % (time.time() - start_time))
+start_time = time.time()
+predicted_diagnoses2 = get_diagnose(system_gal, observation, observation_priors, gate_prior, experiment=True)
+print("--- GAL %s seconds ---" % (time.time() - start_time))
 
 # for observation in observations:
 #     for o, v in observation[1].items():
@@ -24,8 +29,14 @@ predicted_diagnoses = get_diagnose(system_gal, observation, observation_priors, 
 # observation = observations[0]
 #
 # true_diagnoses = get_observation_diagnoses(system_gal, observation, gate_prior)
+print("--- Baseline ---")
 
-print(sorted(predicted_diagnoses, key=operator.itemgetter(1))[::-1])
+print(sorted(predicted_diagnoses1, key=operator.itemgetter(1))[::-1])
+
+print("--- GAL ---")
+
+print(sorted(predicted_diagnoses2, key=operator.itemgetter(1))[::-1])
+
 # print('\n\n\n')
 # print(sorted(true_diagnoses, key=operator.itemgetter(1))[::-1])
 

@@ -1,4 +1,5 @@
 import copy
+from collections import defaultdict
 from string import digits
 import networkx
 import pylab
@@ -12,7 +13,7 @@ class System(object):
         self.inputs = inputs
         self.outputs = outputs
         self.gates = gates
-        #self.map = system_map
+        self.dependencies = self._find_dependencies()
 
     @classmethod
     def create_system(cls, path):
@@ -97,3 +98,19 @@ class System(object):
         # And show the final result
         pylab.axis('off')
         pylab.show()
+
+    def _find_dependencies(self):
+        gate_dependencies = defaultdict(list)  # gates
+        dependencies = defaultdict(list)  # i,z
+        for g in self.gates[::-1]:
+            if 'o' in g.output:
+                gate_dependencies[g.output].append(g.id)
+                dependencies[g.output].extend(g.inputs)
+            else:
+                for output in self.outputs:
+                    if g.output in dependencies[output]:
+                        gate_dependencies[output].append(g.id)
+                        dependencies[output].extend(g.inputs)
+        return gate_dependencies
+
+

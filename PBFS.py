@@ -24,10 +24,11 @@ def add_neighbors(queue, gate_set, gates):
     return candidates + queue
 
 
-def get_diagnose(system, observation, observation_priors, gate_prior):
+def get_diagnose(system, observation, observation_priors, gate_prior, experiment=False):
     diagnoses = []
+    obs_diagnoses = {}
 
-    output_ids = list(observation[1].keys())
+    output_ids = list(system.outputs)
     for i in range(2 ** len(output_ids)):
         values_string = ('{0:0' + str(len(output_ids)) + 'b}').format(i)
 
@@ -43,22 +44,39 @@ def get_diagnose(system, observation, observation_priors, gate_prior):
             else:
                 obs_p *= 1 - observation_priors[o]
 
-        observation_diagnoses = get_observation_diagnoses(system, obs, gate_prior)
-        observation_diagnoses = [(t[0], t[1] * obs_p) for t in observation_diagnoses]
+        if experiment:
+            gs = []
+            for v_i, v in enumerate(values_string):
+                old_value_string = values_string[:v_i] + str(1 - int(v)) + values_string[v_i + 1:]
+                if old_value_string in obs_diagnoses:
+                    gs += [g for g in obs_diagnoses[old_value_string] if g not in gs]
+                    gs += [g for g in system.dependencies.get(output_ids[v_i], []) if g not in gs]
+                if len(gs) == len(system.gates):
+                    break
 
+            observation_diagnoses = get_observation_diagnoses(system, obs, gate_prior, gs, True)
+            obs_diagnoses[values_string] = set([g for t in observation_diagnoses for g in t[0]])
+        else:
+            observation_diagnoses = get_observation_diagnoses(system, obs, gate_prior)
+
+        observation_diagnoses = [(t[0], t[1] * obs_p) for t in observation_diagnoses]
         diagnoses.extend(observation_diagnoses)
 
     return diagnoses
 
 
-def get_observation_diagnoses(system, observation, gate_prior):
+def get_observation_diagnoses(system, observation, gate_prior, gs=[], experiment=False):
     observation_inputs = observation[0]
     observation_outputs = observation[1]
 
-    gates = [g.id for g in system.gates]
+    if experiment:
+        gates = gs
+        gates += [g for g in system.gates if g not in gates]
+    else:
+        gates = system.gates
+
     diagnoses = []
     queue = add_neighbors([], set(), gates)
-
     while len(queue) > 0:
         gate_set = queue.pop()
 
