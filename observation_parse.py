@@ -15,7 +15,7 @@ def preprocess_obs(obs):
             obs_dict[i[1:]] = 0
         else:
             obs_dict[i] = 1
-    return inputs_dict, outputs_dict
+    return inputs_dict, outputs_dict, obs.split(',')[1]
 
 
 def read_observation(path):

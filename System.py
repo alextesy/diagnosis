@@ -46,7 +46,7 @@ class System(object):
             parsed_gates.append(gate)
         return parsed_gates
 
-    def run(self, input_values, invalid_gates=set):
+    def run(self, input_values, invalid_gates=set()):
         gates = self.gates
         values_dict = input_values
         for i in range(len(gates)):

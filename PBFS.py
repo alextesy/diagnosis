@@ -32,6 +32,8 @@ def get_diagnose(system, observation, observation_priors, gate_prior, experiment
     for i in range(2 ** len(output_ids)):
         values_string = ('{0:0' + str(len(output_ids)) + 'b}').format(i)
 
+        print(system.id, observation[-1], 'starts observation', values_string)
+
         obs = (observation[0], {})
 
         for v_i, v in enumerate(values_string):
@@ -61,6 +63,7 @@ def get_diagnose(system, observation, observation_priors, gate_prior, experiment
 
         observation_diagnoses = [(t[0], t[1] * obs_p) for t in observation_diagnoses]
         diagnoses.extend(observation_diagnoses)
+        print(system.id, observation[-1], 'done observation', values_string)
 
     return diagnoses
 
@@ -71,11 +74,22 @@ def get_observation_diagnoses(system, observation, gate_prior, gs=[], experiment
 
     if experiment:
         gates = gs
-        gates += [g for g in system.gates if g not in gates]
+        gates += [g.id for g in system.gates if g.id not in gates]
     else:
-        gates = system.gates
+        gates = [g.id for g in system.gates]
 
     diagnoses = []
+
+    outputs = system.run(input_values=observation_inputs)
+
+    sys_ok = True
+    for o, v in outputs.items():
+        if v != observation_outputs[o]:
+            sys_ok = False
+            break
+    if sys_ok:
+        return diagnoses
+
     queue = add_neighbors([], set(), gates)
     while len(queue) > 0:
         gate_set = queue.pop()
