@@ -2,10 +2,10 @@
 
 def preprocess_obs(obs):
     obs = obs.replace('.', '').replace('[','').replace(']','').replace('\n', '').replace(')', '')
-    obs = obs.split(',')[2:]
+    obs = obs.split(',')[1:]
     inputs_dict = {}
     outputs_dict = {}
-    for i in obs:
+    for i in obs[1:]:
         if 'i' in i:
             obs_dict = inputs_dict
         else:
@@ -15,7 +15,7 @@ def preprocess_obs(obs):
             obs_dict[i[1:]] = 0
         else:
             obs_dict[i] = 1
-    return inputs_dict, outputs_dict, obs.split(',')[1]
+    return inputs_dict, outputs_dict, obs[0]
 
 
 def read_observation(path):

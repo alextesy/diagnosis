@@ -39,27 +39,44 @@ class Gate(object):
 
 class XOR_GATE(Gate):
     def activate(self, inputs):
-        return bool(inputs[0]) != bool(inputs[1])
+        result = bool(inputs[0]) != bool(inputs[1])
+        i = 2
+        while i < len(inputs):
+            result = result != bool(inputs[i])
+            i += 1
+        return result
 
 
 class AND_GATE(Gate):
     def activate(self, inputs):
-        return bool(inputs[0]) and bool(inputs[1])
+        for i in inputs:
+            if not bool(i):
+                return False
+        return True
 
 
 class OR_GATE(Gate):
     def activate(self, inputs):
-        return bool(inputs[0]) or bool(inputs[1])
+        for i in inputs:
+            if bool(i):
+                return True
+        return False
 
 
 class NOR_GATE(Gate):
     def activate(self, inputs):
-        return not(bool(inputs[0]) or bool(inputs[1]))
+        for i in inputs:
+            if bool(i):
+                return False
+        return True
 
 
 class NAND_GATE(Gate):
     def activate(self, inputs):
-        return not(bool(inputs[0]) and bool(inputs[1]))
+        for i in inputs:
+            if not bool(i):
+                return True
+        return False
 
 
 class INVERT_GATE(Gate):

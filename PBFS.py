@@ -53,6 +53,7 @@ def get_diagnose(system, observation, observation_priors, gate_prior, experiment
                 if old_value_string in obs_diagnoses:
                     gs += [g for g in obs_diagnoses[old_value_string] if g not in gs]
                     gs += [g for g in system.dependencies.get(output_ids[v_i], []) if g not in gs]
+                    breakg
                 if len(gs) == len(system.gates):
                     break
 
@@ -61,7 +62,7 @@ def get_diagnose(system, observation, observation_priors, gate_prior, experiment
         else:
             observation_diagnoses = get_observation_diagnoses(system, obs, gate_prior)
 
-        observation_diagnoses = [(t[0], t[1] * obs_p) for t in observation_diagnoses]
+        observation_diagnoses = [(list(t[0]), t[1] * obs_p) for t in observation_diagnoses]
         diagnoses.extend(observation_diagnoses)
         print(system.id, observation[-1], 'done observation', values_string)
 
@@ -93,6 +94,8 @@ def get_observation_diagnoses(system, observation, gate_prior, gs=[], experiment
     queue = add_neighbors([], set(), gates)
     while len(queue) > 0:
         gate_set = queue.pop()
+        if len(diagnoses) > 0 and len(gate_set) > len(diagnoses[0][0]):
+            break
 
         if is_superset(gate_set, diagnoses):
             continue
@@ -106,7 +109,9 @@ def get_observation_diagnoses(system, observation, gate_prior, gs=[], experiment
                 break
 
         if dp > 0:
+            # print('Diagnose found', gate_set)
             diagnoses.append((gate_set, dp))
+            break
 
         queue = add_neighbors(queue, gate_set, gates)
 
