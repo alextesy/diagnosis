@@ -31,7 +31,7 @@ def _obs_run(observation):
     config_dict['predicted_diagnose_baseline'] = predicted_diagnoses1
     config_dict['predicted_diagnose_experiment'] = predicted_diagnoses2
 
-    with open('results/{}_{}.json'.format(sys_name, observation[-1]), 'w') as f:
+    with open('results/randoming_gates/{}_{}.json'.format(sys_name, observation[-1]), 'w') as f:
         json.dump(config_dict, f)
 
     print("--- Baseline ---")
@@ -43,17 +43,18 @@ def _obs_run(observation):
     print(sorted(predicted_diagnoses2, key=operator.itemgetter(1))[::-1])
 
 
-for sys_name in ['74182', '74181', '74183']:
+for sys_name in ['c17', '74182', '74283']:
     system_gal = System.create_system('data_systems/' + sys_name + '.sys')
     #system_gal.draw()
     observations = read_observation('observations/' + sys_name + '_iscas85.obs')
 
-    _obs_run(observations[5])
+    # _obs_run(observations[5])
 
-    # print("Started!!")
-    # with Pool(1) as p:
-    #     p.map(_obs_run, observations[:5])
-    # p.join()
+    for i in range(0, len(observations) - 5, 5):
+        print("Started!!")
+        with Pool(5) as p:
+            p.map(_obs_run, observations[i:i+5])
+        p.join()
 
 
 
