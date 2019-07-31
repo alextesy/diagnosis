@@ -25,7 +25,8 @@ def add_neighbors(queue, gate_set, gates):
     return candidates + queue
 
 
-def get_diagnose(system, observation, observation_priors, gate_prior, experiment=False):
+def get_diagnose(system, observation, observation_priors, gate_prior, experiment=False, use_dependencies=False,
+                 use_previous=False):
     diagnoses = []
     obs_diagnoses = {}
 
@@ -52,8 +53,11 @@ def get_diagnose(system, observation, observation_priors, gate_prior, experiment
             for v_i, v in enumerate(values_string):
                 old_value_string = values_string[:v_i] + str(1 - int(v)) + values_string[v_i + 1:]
                 if old_value_string in obs_diagnoses:
-                    gs += [g for g in obs_diagnoses[old_value_string] if g not in gs]
-                    gs += [g for g in system.dependencies.get(output_ids[v_i], []) if g not in gs]
+                    if use_previous:
+                        gs += [g for g in obs_diagnoses[old_value_string] if g not in gs]
+
+                    if use_dependencies:
+                        gs += [g for g in system.dependencies.get(output_ids[v_i], []) if g not in gs]
                     break
                 if len(gs) == len(system.gates):
                     break
@@ -74,7 +78,9 @@ def get_observation_diagnoses(system, observation, gate_prior, gs=[], experiment
     observation_inputs = observation[0]
     observation_outputs = observation[1]
 
+    np.random.seed(2)
     system_gates = np.random.choice(system.gates, len(system.gates), replace=False)
+
     if experiment:
         gates = gs
         gates += [g.id for g in system_gates if g.id not in gates]
